@@ -51,11 +51,11 @@ function App() {
     setUserRole(role);
   };
 
-  const handleLogout = () => {
-    localStorage.clear();
-    setIsAuthenticated(false);
-    setUserRole("");
-  };
+  // const handleLogout = () => {
+  //   localStorage.clear();
+  //   setIsAuthenticated(false);
+  //   setUserRole("");
+  // };
 
   const ProtectedRoute = ({ children }) => {
     if (!isAuthenticated) return <Navigate to="/login" />;
