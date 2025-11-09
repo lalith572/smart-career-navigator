@@ -46,7 +46,7 @@ const Sidebar = () => {
           { text: "AI Chatbot", icon: <SmartToyIcon />, path: "/chatbot" },
         ]
       : [
-          { text: "Student Dashboard", icon: <DashboardIcon />, path: "/student" },
+          { text: "Student Dashboard", icon: <DashboardIcon />, path: "/studentdashboard" },
           { text: "Resume Analyzer", icon: <DescriptionIcon />, path: "/resume" },
           { text: "Job Recommendations", icon: <WorkIcon />, path: "/jobs" },
           { text: "Course Recommendations", icon: <SchoolIcon />, path: "/courses" },
