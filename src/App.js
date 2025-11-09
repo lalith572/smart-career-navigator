@@ -1,113 +1,165 @@
-import React, { useMemo, useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
+// src/App.js
+// At top
 
+import React from "react";
+import {
+  // BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import { ThemeProvider, CssBaseline, createTheme } from "@mui/material";
 import Sidebar from "./components/Sidebar";
-import Header from "./components/Header";
-import MessagesPanel from "./components/MessagesPanel";
-
 import Dashboard from "./pages/Dashboard";
-import StudentDashboard from "./pages/StudentDashboard";
+import Students from "./pages/Students";
 import ResumeAnalyzer from "./pages/ResumeAnalyzer";
-import Login from "./pages/auth/Login";
-import Register from "./pages/auth/Register";
-import ManageStudents from "./pages/ManageStudents";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import StudentDashboard from "./pages/StudentDashboard";
+import JobRecommendations from "./pages/JobRecommendations";
+import CourseRecommendations from "./pages/CourseRecommendations";
+import Chatbot from "./pages/Chatbot";
+import { getSession } from "./api/mockApi";
 
-function App() {
-  const [mode, setMode] = useState("light");
-  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem("token"));
-  const [userRole, setUserRole] = useState(localStorage.getItem("role") || "");
+// import ThemeToggle from "./components/ThemeToggle";
 
-  // Watch for auth changes
-  useEffect(() => {
-    const handleStorageChange = () => {
-      setIsAuthenticated(!!localStorage.getItem("token"));
-      setUserRole(localStorage.getItem("role"));
-    };
-    window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
-  }, []);
+const theme = createTheme({
+  palette: {
+    mode: "light",
+    primary: { main: "#1976d2" },
+    secondary: { main: "#6C63FF" },
+    background: { default: "#f9f9f9" },
+  },
+  typography: { fontFamily: "Inter, sans-serif" },
+});
 
-  const toggleTheme = () => setMode((prev) => (prev === "light" ? "dark" : "light"));
+// Protect routes (redirects to /login if not logged in)
+function PrivateRoute({ children }) {
+  const session = getSession();
+  return session ? children : <Navigate to="/login" replace />;
+}
 
-  const theme = useMemo(
-    () =>
-      createTheme({
-        palette: {
-          mode,
-          primary: { main: mode === "light" ? "#1976d2" : "#90caf9" },
-          background: {
-            default: mode === "light" ? "#f9f9fb" : "#121212",
-            paper: mode === "light" ? "#fff" : "#1e1e1e",
-          },
-        },
-        typography: { fontFamily: "'Inter', sans-serif" },
-      }),
-    [mode]
+// Main App Layout
+const AppLayout = ({ children }) => {
+  return (
+    <div style={{ display: "flex" }}>
+      <Sidebar />
+      <main style={{ flexGrow: 1, padding: "24px", marginTop: "64px" }}>
+        {children}
+      </main>
+    </div>
   );
+};
 
-  const handleLoginSuccess = (role) => {
-    setIsAuthenticated(true);
-    setUserRole(role);
-  };
-
-  // const handleLogout = () => {
-  //   localStorage.clear();
-  //   setIsAuthenticated(false);
-  //   setUserRole("");
-  // };
-
-  const ProtectedRoute = ({ children }) => {
-    if (!isAuthenticated) return <Navigate to="/login" />;
-    return children;
-  };
+const App = () => {
+  const session = getSession();
+  const role = session?.role;
+  
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Router>
-        {isAuthenticated && <Sidebar />}
-        {isAuthenticated && <Header toggleTheme={toggleTheme} mode={mode} />}
-        {isAuthenticated && <MessagesPanel />}
-
+      {/* <Router> */}
         <Routes>
-          {/* AUTH ROUTES */}
-          <Route path="/login" element={<Login onLoginSuccess={handleLoginSuccess} />} />
+          {/* Auth routes */}
+          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
-          {/* PROTECTED ROUTES */}
+          {/* Admin routes */}
           <Route
-            path="/"
+            path="/dashboard"
             element={
-              <ProtectedRoute>
-                {userRole === "admin" ? <Dashboard /> : <StudentDashboard />}
-              </ProtectedRoute>
+              <PrivateRoute>
+                {role === "admin" ? (
+                  <AppLayout>
+                    <Dashboard />
+                  </AppLayout>
+                ) : (
+                  <Navigate to="/student" replace />
+                )}
+              </PrivateRoute>
             }
           />
           <Route
-              path="/students"
-              element={
-                <ProtectedRoute>
-                  {userRole === "admin" ? <ManageStudents /> : <Navigate to="/" />}
-                </ProtectedRoute>
-              }
-            />
-
+            path="/students"
+            element={
+              <PrivateRoute>
+                {role === "admin" ? (
+                  <AppLayout>
+                    <Students />
+                  </AppLayout>
+                ) : (
+                  <Navigate to="/student" replace />
+                )}
+              </PrivateRoute>
+            }
+          />
           <Route
             path="/resume"
             element={
-              <ProtectedRoute>
-                <ResumeAnalyzer />
-              </ProtectedRoute>
+              <PrivateRoute>
+                <AppLayout>
+                  <ResumeAnalyzer />
+                </AppLayout>
+              </PrivateRoute>
             }
           />
 
-          {/* FALLBACK */}
-          <Route path="*" element={<Navigate to="/" />} />
+          {/* Student routes */}
+          <Route
+            path="/student"
+            element={
+              <PrivateRoute>
+                {role === "student" ? (
+                  <AppLayout>
+                    <StudentDashboard />
+                  </AppLayout>
+                ) : (
+                  <Navigate to="/dashboard" replace />
+                )}
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/jobs"
+            element={
+              <PrivateRoute>
+                <AppLayout>
+                  <JobRecommendations />
+                </AppLayout>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/courses"
+            element={
+              <PrivateRoute>
+                <AppLayout>
+                  <CourseRecommendations />
+                </AppLayout>
+              </PrivateRoute>
+            }
+          />
+
+          {/* AI Chatbot */}
+          <Route
+            path="/chatbot"
+            element={
+              <PrivateRoute>
+                <AppLayout>
+                  <Chatbot />
+                </AppLayout>
+              </PrivateRoute>
+            }
+          />
+
+          {/* Catch-all redirect */}
+          <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
-      </Router>
+      {/* </Router> */}
     </ThemeProvider>
   );
-}
+};
 
 export default App;

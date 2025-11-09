@@ -1,27 +1,22 @@
-import { Card, CardContent, Typography } from "@mui/material";
+import React from "react";
+import { Bar } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  BarElement,
+  CategoryScale,
+  LinearScale,
+  Tooltip,
+  Legend,
+} from "chart.js";
 
-export default function StatsCard({ title, value, subtitle }) {
-  return (
-    <Card
-      sx={{
-        borderRadius: 3,
-        boxShadow: 2,
-        height: "100%",
-      }}
-    >
-      <CardContent>
-        <Typography variant="subtitle2" color="text.secondary">
-          {title}
-        </Typography>
-        <Typography variant="h5" fontWeight="bold" sx={{ my: 1 }}>
-          {value}
-        </Typography>
-        {subtitle && (
-          <Typography variant="caption" color="text.secondary">
-            {subtitle}
-          </Typography>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
+ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
+
+const BarChart = ({ data }) => {
+  const options = {
+    responsive: true,
+    plugins: { legend: { display: false } },
+  };
+  return <Bar data={data} options={options} />;
+};
+
+export default BarChart;

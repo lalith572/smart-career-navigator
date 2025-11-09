@@ -1,12 +1,43 @@
-import React from "react";
-import IconButton from "@mui/material/IconButton";
-import Brightness4Icon from "@mui/icons-material/Brightness4";
-import Brightness7Icon from "@mui/icons-material/Brightness7";
+// src/components/ThemeToggle.jsx
+import React, { useEffect, useState } from "react";
+import { IconButton, Tooltip } from "@mui/material";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
+import LightModeIcon from "@mui/icons-material/LightMode";
 
-export default function ThemeToggle({ mode, toggleTheme }) {
+const ThemeToggle = ({ onToggle, mode }) => {
+  const [themeMode, setThemeMode] = useState(mode || "light");
+
+  // Handle theme switching
+  const handleThemeChange = () => {
+    const newMode = themeMode === "light" ? "dark" : "light";
+    setThemeMode(newMode);
+    localStorage.setItem("scn_theme", newMode);
+    onToggle(newMode);
+  };
+
+  useEffect(() => {
+    const saved = localStorage.getItem("scn_theme");
+    if (saved) {
+      setThemeMode(saved);
+      onToggle(saved);
+    }
+    // eslint-disable-next-line
+  }, []);
+
   return (
-    <IconButton onClick={toggleTheme} color="inherit">
-      {mode === "dark" ? <Brightness7Icon /> : <Brightness4Icon />}
-    </IconButton>
+    <Tooltip title={`Switch to ${themeMode === "light" ? "Dark" : "Light"} Mode`}>
+      <IconButton
+        onClick={handleThemeChange}
+        color="inherit"
+        sx={{
+          transition: "0.3s",
+          "&:hover": { transform: "scale(1.1)" },
+        }}
+      >
+        {themeMode === "light" ? <DarkModeIcon /> : <LightModeIcon />}
+      </IconButton>
+    </Tooltip>
   );
-}
+};
+
+export default ThemeToggle;
