@@ -16,7 +16,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [studentCount, setStudentCount] = useState(0);
   const [avgCGPA, setAvgCGPA] = useState(0);
-  const [successRate, setSuccessRate] = useState(92);
+  const [successRate] = useState(92);
 
   useEffect(() => {
     const fetchData = async () => {
